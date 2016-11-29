@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"net/url"
 )
 
 const (
@@ -25,6 +26,11 @@ type Request struct {
 	Body *bytes.Buffer
 	// Query parameters for the url
 	QueryParams map[string]string
+}
+
+// Response method to wrap http response method and add custom functions
+type Response struct {
+	*http.Response
 }
 
 // New create a new request object with no defaults
@@ -110,8 +116,13 @@ func (r *Request) Delete(url string) *Request {
 }
 
 // Send method to send the request
-func (r *Request) Send() (*http.Response, error) {
-	req, err := http.NewRequest(r.Method, r.URL, r.Body)
+func (r *Request) Send() (*Response, error) {
+	url, err := setQueryParams(r.URL, r.QueryParams)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(r.Method, url, r.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -122,12 +133,12 @@ func (r *Request) Send() (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	return resp, nil
+
+	return &Response{resp}, nil
 }
 
 // SendJSON method to send json payloads, it takes a generic interface and transforms it into JSON
-func (r *Request) SendJSON(body interface{}) (*http.Response, error) {
+func (r *Request) SendJSON(body interface{}) (*Response, error) {
 	b := new(bytes.Buffer)
 	if err := json.NewEncoder(b).Encode(body); err != nil {
 		return nil, err
@@ -135,8 +146,27 @@ func (r *Request) SendJSON(body interface{}) (*http.Response, error) {
 	return r.SetBodyBuffer(b).Send()
 }
 
+// ParseJSON parse the request body into a struct
+func (resp *Response) ParseJSON(ptr interface{}) error {
+	defer resp.Body.Close()
+	return json.NewDecoder(resp.Body).Decode(ptr)
+}
+
 func setHeaders(r *http.Request, headers map[string]string) {
 	for k, v := range headers {
 		r.Header.Set(k, v)
 	}
+}
+
+func setQueryParams(URL string, params map[string]string) (string, error) {
+	urlObj, err := url.Parse(URL)
+	if err != nil {
+		return "", err
+	}
+	q := urlObj.Query()
+	for k, v := range params {
+		q.Add(k, v)
+	}
+	urlObj.RawQuery = q.Encode()
+	return urlObj.String(), nil
 }
