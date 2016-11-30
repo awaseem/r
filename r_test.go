@@ -1,6 +1,7 @@
-package main
+package r
 
 import "testing"
+import "net/http"
 
 func TestSetHeader(t *testing.T) {
 	r := New().SetHeader("hello", "world")
@@ -100,5 +101,47 @@ func TestDelete(t *testing.T) {
 	}
 	if r.Headers["Content-Type"] != "application/json" {
 		t.Errorf("Failed to set default json header for request object")
+	}
+}
+
+func TestSetQueryParams(t *testing.T) {
+	url := "www.test.com"
+	params := make(map[string]string)
+	params["hello"] = "world"
+	r, err := setQueryParams(url, params)
+	if err != nil {
+		t.Error("errored query params test case when its not suppose to...")
+	}
+	if r != "www.test.com?hello=world" {
+		t.Errorf("Failed to set query parameters")
+	}
+}
+
+func TestSetHeaders(t *testing.T) {
+	httpR, _ := http.NewRequest("POST", "test", nil)
+	headers := make(map[string]string)
+	headers["hello"] = "world"
+	setHeaders(httpR, headers)
+	if httpR.Header.Get("hello") != "world" {
+		t.Errorf("Failed set headers for request object")
+	}
+}
+
+func TestGetRequest(t *testing.T) {
+	r, _ := New().Get("http://httpbin.org/ip").Send()
+	if r.StatusCode != 200 {
+		t.Error("Failed to request data from httpbin")
+	}
+}
+
+func TestParseJSON(t *testing.T) {
+	type res struct {
+		Origin string `json:"origin"`
+	}
+	resB := res{}
+	r, _ := New().Get("http://httpbin.org/ip").Send()
+	r.ParseJSON(&resB)
+	if resB.Origin == "" {
+		t.Errorf("Failed to parse httpbin resposne")
 	}
 }
