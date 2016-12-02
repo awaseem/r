@@ -3,6 +3,7 @@
 </p>
 
 # r
+[![Build Status](https://travis-ci.org/awaseem/r.svg?branch=master)](https://travis-ci.org/awaseem/r)
 [![Go Report Card](https://goreportcard.com/badge/github.com/awaseem/r)](https://goreportcard.com/report/github.com/awaseem/r)
 
 Easiest way to make requests.
