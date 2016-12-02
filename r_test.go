@@ -140,7 +140,7 @@ func TestParseJSON(t *testing.T) {
 	}
 	resB := res{}
 	r, _ := New().Get("http://httpbin.org/ip").Send()
-	r.ParseJSON(&resB)
+	ParseJSON(r, &resB)
 	if resB.Origin == "" {
 		t.Errorf("Failed to parse httpbin resposne")
 	}

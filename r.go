@@ -28,11 +28,6 @@ type Request struct {
 	QueryParams map[string]string
 }
 
-// Response method to wrap http response method and add custom functions
-type Response struct {
-	*http.Response
-}
-
 // New create a new request object with no defaults
 func New() *Request {
 	r := Request{}
@@ -116,7 +111,7 @@ func (r *Request) Delete(url string) *Request {
 }
 
 // Send method to send the request
-func (r *Request) Send() (*Response, error) {
+func (r *Request) Send() (*http.Response, error) {
 	url, err := setQueryParams(r.URL, r.QueryParams)
 	if err != nil {
 		return nil, err
@@ -134,11 +129,11 @@ func (r *Request) Send() (*Response, error) {
 		return nil, err
 	}
 
-	return &Response{resp}, nil
+	return resp, nil
 }
 
 // SendJSON method to send json payloads, it takes a generic interface and transforms it into JSON
-func (r *Request) SendJSON(body interface{}) (*Response, error) {
+func (r *Request) SendJSON(body interface{}) (*http.Response, error) {
 	b := new(bytes.Buffer)
 	if err := json.NewEncoder(b).Encode(body); err != nil {
 		return nil, err
@@ -147,7 +142,7 @@ func (r *Request) SendJSON(body interface{}) (*Response, error) {
 }
 
 // ParseJSON parse the request body into a struct
-func (resp *Response) ParseJSON(ptr interface{}) error {
+func ParseJSON(resp *http.Response, ptr interface{}) error {
 	defer resp.Body.Close()
 	return json.NewDecoder(resp.Body).Decode(ptr)
 }
