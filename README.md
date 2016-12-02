@@ -1,4 +1,5 @@
 # r
+[![Go Report Card](https://goreportcard.com/badge/github.com/awaseem/r)](https://goreportcard.com/report/github.com/awaseem/r)
 
 Easiest way to make requests.
 
