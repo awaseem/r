@@ -42,3 +42,7 @@ res, _ := r.New().Post("http://example.com/").Send()
 // body will hold the values from the JSON response
 err := r.ParseJSON(res, &body)
 ```  
+
+# Defaults
+
+The following is the only header is set as default `"Content-Type" = "application/json"`
