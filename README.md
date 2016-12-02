@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="http://i.imgur.com/jv4RVHD.png">
+</p>
+
 # r
 [![Go Report Card](https://goreportcard.com/badge/github.com/awaseem/r)](https://goreportcard.com/report/github.com/awaseem/r)
 
