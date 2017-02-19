@@ -2,6 +2,7 @@ package r
 
 import "testing"
 import "net/http"
+import "net/http/httptest"
 
 func TestSetHeader(t *testing.T) {
 	r := New().SetHeader("hello", "world")
@@ -128,18 +129,34 @@ func TestSetHeaders(t *testing.T) {
 }
 
 func TestGetRequest(t *testing.T) {
-	r, _ := New().Get("http://httpbin.org/ip").Send()
+	// setup
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := w.Write([]byte("ok"))
+		if err != nil {
+			t.Errorf("Failed to write response")
+		}
+	}))
+	defer server.Close()
+	r, _ := New().Get(server.URL).Send()
 	if r.StatusCode != 200 {
 		t.Error("Failed to request data from httpbin")
 	}
 }
 
 func TestParseJSON(t *testing.T) {
+	// setup
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := w.Write([]byte(`{"origin": "ok"}`))
+		if err != nil {
+			t.Errorf("Failed to write response")
+		}
+	}))
+	defer server.Close()
 	type res struct {
 		Origin string `json:"origin"`
 	}
 	resB := res{}
-	r, _ := New().Get("http://httpbin.org/ip").Send()
+	r, _ := New().Get(server.URL).Send()
 	ParseJSON(r, &resB)
 	if resB.Origin == "" {
 		t.Errorf("Failed to parse httpbin resposne")
